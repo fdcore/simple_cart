@@ -70,10 +70,14 @@ class Simple_cart{
 
             if(isset($item['hash'])){
                 $hash = hash_hmac('sha256', $item['entry_id'].$item['price'].$item['qty'].$item['name'], 'simpleCart');
+
+                $item['full_price'] = $item['qty']*$item['price'];
+
                 if($item['hash'] == $hash){
                     $items[]=$item;
-                } else $items[]=$item;
+                }
             }
+
         }
 
         if(count($items) == 0 ) return $this->EE->TMPL->no_results();
@@ -119,6 +123,24 @@ class Simple_cart{
         $this->EE->functions->set_cookie('scart', addslashes($data), 86500);
     }
 
+    function full_price(){
+
+        if(isset($_COOKIE['exp_scart'])){
+            $cc     = $_COOKIE['exp_scart'];
+            $items  = json_decode($cc, true);
+        } else return;
+
+        $total = 0;
+
+        foreach($items as $key=>$item){
+
+            $sum = $item['qty']*$item['price'];
+            $total+=$sum;
+        }
+
+        return $total;
+    }
+
     function clean(){
         $this->EE->functions->set_cookie('scart', '');
     }
@@ -148,7 +170,7 @@ class Simple_cart{
         $buffer = ob_get_contents();
         ob_end_clean();
 
-        return htmlentities($buffer);
+        return $buffer;
     }
 
 }
